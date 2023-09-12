@@ -1,0 +1,96 @@
+MyDB.java
+package org.pack;
+
+import java.sql.*;
+
+public class MyDB {
+
+    private Connection con;
+    private Statement statement;
+    private ResultSet rs;
+    
+    public MyDB() {
+        try {
+            Class.forName("com.mysql.jdbc.Driver");
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3306/mysql", "root","vec");
+            System.out.println(con);
+            statement = con.createStatement();
+            System.out.println(statement);
+        } catch (ClassNotFoundException e) {
+            System.out.println("Unable to connect");
+        } catch (Exception se) {
+            System.out.println("sql error!");
+        }
+    }
+
+    public String displayWithbrowser() {
+        String dbdata = "<table>";
+        try {
+            rs = statement.executeQuery("Select * From tbl");
+            while (rs.next()) {
+                dbdata += "<tr>" + "<td style='width:300px'>" + rs.getString(1) + "</td><td style='width:300px'>" + rs.getString(2) + "</td></tr>";
+            }
+        } catch (SQLException se) {
+            System.out.println("sql error!");
+        }
+        return dbdata + "</table>";
+    }
+
+    public int insertdata(String firstname, String email) {
+        try {
+            System.out.println(firstname + " " + email);
+            statement.executeUpdate("INSERT INTO tbl(firstname,email) values('" + firstname + "','" + email + "')");
+        } catch (SQLException se) {
+            System.out.println("sql error!");
+        }
+        return 1;
+    }
+
+    public void closecon() {
+        try {
+            con.close();
+        } catch (SQLException se) {
+            System.out.println("sql error!");
+        }
+    }
+}
+
+
+
+
+insert.html
+
+<html>
+<head>
+<title></title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head>
+<body>
+<form name="Insertion" action="insert.jsp">
+ Name: <input type="text" name="firstName">
+<input type="text" name="email"><br>
+<input type="submit">
+</form>
+</body>
+</html>
+
+
+insert.jsp
+
+<%@ page import="org.pack.MyDB" %>
+<html>
+    <body style="Background-color:#CCC0FF">
+        <% out.println("<h2>Clients List</h2>"); %>
+        <h3>------------------------------------------------------------------
+            ------------</h3>
+            <% String firstname = request.getParameter("firstName");
+                String email = request.getParameter("email");
+                MyDB mysql = new MyDB();
+                mysql.insertdata(firstname, email);
+                out.println(mysql.displayWithbrowser());
+                mysql.closecon();
+            %>
+        <h3>------------------------------------------------------------------
+            ------------</h3>
+    </body>
+</html> 
